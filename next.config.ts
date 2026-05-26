@@ -1,13 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    // Memaksa Vercel mengabaikan semua error type checking saat build production
-    ignoreBuildErrors: true,
-  },
   eslint: {
-    // Memaksa Vercel mengabaikan pengecekan ESLint saat build production
+    // Ini mantra sakti buat memaksa Vercel mengabaikan seluruh error ESLint saat build production
     ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Sekalian abaikan error typechecking biar aman sentosa
+    ignoreBuildErrors: true,
   },
 };
 
