@@ -1,16 +1,39 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import confetti from "canvas-confetti";
 import Marquee from "react-fast-marquee";
+import { FaHeart } from "react-icons/fa"; // Memastikan icon FaHeart terimport untuk floating hearts
+
+// Interface pendukung tipe data TypeScript agar terbebas dari error check Vercel
+interface HeartType {
+  id: number;
+  left: string;
+  delay: number;
+  duration: number;
+  size: number;
+}
 
 export default function Home() {
   const [warning, setWarning] = useState(false);
   const [showGif, setShowGif] = useState(false);
   const [showMyPhoto, setShowMyPhoto] = useState(false); // State untuk pop-up foto kamu
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
+  const [hearts, setHearts] = useState<HeartType[]>([]); // State hearts dengan tipe data terdefinisi eksplisit
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Efek generator posisi acak untuk floating hearts background (Aman untuk SSR Next.js)
+  useEffect(() => {
+    const generatedHearts = Array.from({ length: 6 }).map((_, i) => ({
+      id: i,
+      left: `${Math.random() * 90 + 5}%`,
+      delay: i * 1.5,
+      duration: Math.random() * 3 + 6,
+      size: Math.random() * 15 + 15
+    }));
+    setHearts(generatedHearts);
+  }, []);
 
   const triggerChaos = () => {
     confetti({
@@ -66,6 +89,27 @@ export default function Home() {
         />
       </div>
 
+      {/* Floating Hearts Background (Memanfaatkan state hearts yang sudah diperbaiki tipenya) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {hearts.map((heart) => (
+          <motion.div
+            key={heart.id}
+            initial={{ y: "100vh", opacity: 0 }}
+            animate={{ y: "-10vh", opacity: [0, 0.25, 0.25, 0] }}
+            transition={{
+              duration: heart.duration,
+              repeat: Infinity,
+              delay: heart.delay,
+              ease: "linear"
+            }}
+            className="absolute text-pink-500/20"
+            style={{ left: heart.left, bottom: 0 }}
+          >
+            <FaHeart style={{ width: heart.size, height: heart.size }} />
+          </motion.div>
+        ))}
+      </div>
+
       {/* POP-UP FOTO KAMU (Dipicu tombol Jamaah Jangan Diklik) */}
       <AnimatePresence>
         {showMyPhoto && (
@@ -85,7 +129,7 @@ export default function Home() {
               {/* Box Wadah Foto */}
               <div className="overflow-hidden rounded-2xl border-4 border-white/10 aspect-[3/4] bg-neutral-800 flex items-center justify-center">
                 <img
-                  src="/foto-aku.jpeg" // Sesuai dengan nama file asli di folder public kamu
+                  src="/foto-aku.jpeg" // Memakai ekstensi .jpeg sesuai file di folder public kamu
                   alt="Foto Ganteng Pembuat Web"
                   className="w-full h-full object-cover"
                 />
